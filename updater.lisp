@@ -7,8 +7,6 @@
 
 (in-package #:rgbshift)
 
-(defparameter *dt* 0) ;; delta time 
-
 (defclass updater (node)
   ((height :initform 1) ;; these should be set for drawing
    (width :initform 1) ;; so that things are actually shown

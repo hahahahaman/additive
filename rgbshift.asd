@@ -8,8 +8,10 @@
   :serial t
   :components ((:file "package")
 	       (:file "utils")
+	       (:file "globals")	       
 	       (:file "updater")
 	       (:file "wall")
+	       (:file "bullet")
 	       (:file "ship")
 	       (:file "player")
 	       (:file "level")

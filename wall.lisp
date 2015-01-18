@@ -5,15 +5,14 @@
 
 (in-package #:rgbshift)
 
-(defparameter *unit* 16)
-(defun units (n) (* *unit* n))
-
 (defclass wall (node)
-  ((color :initform "SteelBlue1")))
+  ((color
+    :initform '(0 0 0 255)
+    :accessor wall-color)))
 
 (defmethod draw ((wall wall))
   (with-slots (x y width height color) wall
-    (draw-textured-rectangle-* x y 0  width height (find-texture "up")
+    (draw-textured-rectangle-* x y 0  width height (find-texture "data/square.png")
 			       :vertex-color color)))
      ;;(draw-image "splash.png" :width width :height height)))
 

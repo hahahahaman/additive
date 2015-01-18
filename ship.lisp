@@ -5,8 +5,6 @@
    (width :initform 16)
    (color :initform "white")
    (speed :initform 5)
-   (speed-x :initform 0)
-   (speed-y :initform 0)
    (direction :initform nil)
    (last-x :initform 0)
    (last-y :initform 0)))
