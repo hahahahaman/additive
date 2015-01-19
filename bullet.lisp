@@ -22,7 +22,7 @@
     :reader bullet-speed)
    (lifespan
     :initarg :lifespan
-    :initform 0.5
+    :initform 0.3
     :reader bullet-lifespan)
    (lifetime
     :initform 0.0

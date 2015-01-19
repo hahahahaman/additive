@@ -5,12 +5,12 @@
 
 (in-package #:rgbshift)
 
-(defparameter *width* 640)
-(defparameter *height* 480)
+(defparameter *width* 800)
+(defparameter *height* 600)
 
 (defparameter *dt* 0) ;; delta time
 
 (defparameter *unit* 16)
 
 (defresource "data/square.png")
-
+(defresource "data/space.png")

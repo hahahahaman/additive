@@ -9,17 +9,36 @@
 ;;; Keyboard press sensing functions
 
 (defclass player (ship)
-  ((height :initform 16)
-   (width :initform 16)
-   (color :initform '(255 0 0 255))
-   (speed :initform 400)
-   (direction :initform nil)
-   (last-x :initform 0)
-   (last-y :initform 0)
-   (point-x :initform 0) ;;relative pointer positions
-   (point-y :initform 0)
-   (reload-time :initform 0.55)
-   (reload-timer :initform 0.0)))
+  ((height
+    :initform 16
+    :type (unsigned-byte 8))
+   (width
+    :initform 16
+    :type (unsigned-byte 8))
+   (color
+    :initform '(255 0 0 255)
+    :type list)
+   (speed
+    :initform 400.0
+    :type short-float)
+   (direction
+    :initform 0.0
+    :type short-float)
+   (last-x
+    :initform 0.0
+    :type short-float)
+   (last-y
+    :initform 0.0
+    :type short-float)
+   (point-x
+    :initform 0.0
+    :type short-float) ;;relative pointer positions
+   (point-y
+    :initform 0.0
+    :type short-float)
+   (reload-cooldown
+    :initform (make-cooldown :time 0.55)
+    :type cooldown)))
 
 (defgeneric fire (player))
 
@@ -54,8 +73,7 @@
 			 color
 			 width height
 			 point-x point-y
-			 reload-time
-			 reload-timer) player
+			 reload-cooldown) player
     (setf point-x (+ (window-pointer-x) (slot-value (current-buffer) 'window-x))
 	  point-y (+ (window-pointer-y) (slot-value (current-buffer) 'window-y))
 	  direction (find-heading (+ x (/ width 2.0))
@@ -73,33 +91,33 @@
       (move player direction (* speed *dt*)))
 
     ;; adjust the camera so that player remains in the center
-    (let ((cam-diff-x (- (+ (/ width 2.0) x) (slot-value (current-buffer) 'window-x)))
-	  (cam-diff-y (- (+ (/ width 2.0) y) (slot-value (current-buffer) 'window-y))))
-      (move-window-to (current-buffer)
-		      (slot-value (current-buffer) 'window-x)
-		      (cond ((< (- (/ *screen-height* 2.0) cam-diff-y) (/ *screen-height* 15.0))
-			     (slot-value (current-buffer) 'window-y))
-			    ((> cam-diff-y (/ *screen-height* 2.0))
-			     (+ (slot-value (current-buffer) 'window-y) (* (/ speed 1.5) *dt*)))
-			    ((< cam-diff-y (/ *screen-height* 2.0))
-			     (- (slot-value (current-buffer) 'window-y) (* (/ speed 1.5) *dt*)))))
-      (move-window-to (current-buffer)
-		      (cond ((< (- (/ *screen-height* 2.0) cam-diff-x) (/ *screen-height* 15.0))
-			     (slot-value (current-buffer) 'window-x))
-			    ((> cam-diff-x (/ *screen-height* 2.0))
-			     (+ (slot-value (current-buffer) 'window-x) (* (/ speed 1.5) *dt*)))
-			    ((< cam-diff-x (/ *screen-height* 2.0))
-			     (- (slot-value (current-buffer) 'window-x) (* (/ speed 1.5) *dt*))))
-		      (slot-value (current-buffer) 'window-y)))
+    ;; (let ((cam-diff-x (- (+ (/ width 2.0) x) (slot-value (current-buffer) 'window-x)))
+    ;; 	  (cam-diff-y (- (+ (/ width 2.0) y) (slot-value (current-buffer) 'window-y))))
+    ;;   (move-window-to (current-buffer)
+    ;; 		      (slot-value (current-buffer) 'window-x)
+    ;; 		      (cond ((< (- (/ *screen-height* 2.0) cam-diff-y) (/ *screen-height* 15.0))
+    ;; 			     (slot-value (current-buffer) 'window-y))
+    ;; 			    ((> cam-diff-y (/ *screen-height* 2.0))
+    ;; 			     (+ (slot-value (current-buffer) 'window-y) (* (/ speed 1.5) *dt*)))
+    ;; 			    ((< cam-diff-y (/ *screen-height* 2.0))
+    ;; 			     (- (slot-value (current-buffer) 'window-y) (* (/ speed 1.5) *dt*)))))
+    ;;   (move-window-to (current-buffer)
+    ;; 		      (cond ((< (- (/ *screen-height* 2.0) cam-diff-x) (/ *screen-height* 15.0))
+    ;; 			     (slot-value (current-buffer) 'window-x))
+    ;; 			    ((> cam-diff-x (/ *screen-height* 2.0))
+    ;; 			     (+ (slot-value (current-buffer) 'window-x) (* (/ speed 1.5) *dt*)))
+    ;; 			    ((< cam-diff-x (/ *screen-height* 2.0))
+    ;; 			     (- (slot-value (current-buffer) 'window-x) (* (/ speed 1.5) *dt*))))
+    ;; 		      (slot-value (current-buffer) 'window-y)))
     
     ;; left mouse firing
-    (when (< reload-timer reload-time)
-      (incf reload-timer *dt*))
+    (when (< (cooldown-timer reload-cooldown) (cooldown-time reload-cooldown))
+      (incf (cooldown-timer reload-cooldown) *dt*))
     
     (when (and (left-mouse-pressed)
-	       (> reload-timer reload-time))
+	       (> (cooldown-timer reload-cooldown) (cooldown-time reload-cooldown)))
       (fire player)
-      (setf reload-timer 0.0))))
+      (setf (cooldown-timer reload-cooldown) 0.0))))
 ;; (snap-window-to-node (current-buffer) player)))
 ;; (move-window (current-buffer) (- x last-x) (- y last-y)))))
 ;;(move-window-to-node (current-buffer) player))

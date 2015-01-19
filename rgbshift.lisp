@@ -25,7 +25,8 @@
     (open-project :rgbshift)
     (index-pending-resources)
     (let ((level (make-instance 'level)))
-      ;;(follow-with-camera level (slot-value level 'player))
+      ;;(with-slots (window-scrolling-speed player) level)
+      (follow-with-camera level (slot-value level 'player))
       (switch-to-buffer level)
       (start-game level))))
 
