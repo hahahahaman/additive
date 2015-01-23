@@ -10,13 +10,13 @@
 
 (defclass player (ship)
   ((height
-    :initform 16
+    :initform 32
     :type (unsigned-byte 8))
    (width
-    :initform 16
+    :initform 32
     :type (unsigned-byte 8))
    (color
-    :initform '(255 0 0 255)
+    :initform '(0 0 0 255)
     :type list)
    (speed
     :initform 400.0
@@ -46,25 +46,18 @@
   (with-slots (direction x y width height) player
       (let ((bullet (make-instance 'bullet
 				   :color '(255 0 0 255)
-				   :direction direction)))
+				   :direction direction))
+	    (angle (+ (/ pi 2) direction))
+	    (center-x (+ x (/ width 2)))
+	    (center-y (+ y (/ height 2)))
+	    (sqrt2 1.4142135))
 	(insert bullet)
-	(move-to bullet x y))))
-	;; (let ((pi/4 (/ pi 4))
-	;;       (move-to bullet		
-	;; 	(cond ((and (<= pi/4 direction)
-	;; 		    (<= direction (* 3 pi/4)))
-	;; 	       (- x 1))
-	;; 	      ((and (<= (* 5 pi/4) direction)
-	;; 		    (<= direction (* 7 pi/4)))
-	;; 	       (+ x width 1))
-	;; 	      (t (+ x (/ width 2.0) (* (/ width 2.0) (cos direction)))))
-	;; 	(cond ((and (<= (- pi/4) direction)
-	;; 		    (<= direction pi/4))
-	;; 	       (- y 1))
-	;; 	      ((and (<= (* 3 pi/4) direction)
-	;; 		    (<= direction (* 5 pi/4)))
-	;; 	       (+ y height 1))
-	;; 	      (t (+ y (/ height 2.0) (* (/ height 2.0) (sin direction)))))))))))
+
+	;; Clockwise 2D lin. transformation
+	;; and scaled so that bullet isn't in player hitbox
+	(move-to bullet
+		 (+ center-x (* sqrt2 (1+ (/ height -2)) (- (sin angle))))
+		 (+ center-y (* sqrt2 (1+ (/ height -2)) (cos angle)))))))
 
 (defmethod update ((player player))
   (with-slots (direction speed
@@ -123,7 +116,7 @@
 ;;(move-window-to-node (current-buffer) player))
 
 (defmethod draw ((player player))
-  (with-slots (x y width height point-x point-y direction) player
+  (with-slots (x y width height point-x point-y direction color) player
     (draw-textured-rectangle-* x y 0 width height
 			       (find-texture "up") ;;place holder image
 			       :angle (+ 90 (*
@@ -132,7 +125,7 @@
 			       :tex-w (find-resource-property "up" :width)
 			       :tex-h (find-resource-property "up" :height)
 			       :clip-x 9 :clip-y 9 :clip-w 45 :clip-h 45
-			       :vertex-color '(255 0 0 255))))
+			       :vertex-color color)))
 
 (defmethod collide ((player player) (wall wall))
   (with-slots (direction speed last-x last-y x y width height) player
@@ -149,3 +142,4 @@
 	   y last-x
 	   (+ last-x width) (+ y height))
       (move-to player x last-y))))
+

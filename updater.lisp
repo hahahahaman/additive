@@ -36,8 +36,7 @@
   (let ((fps-string (concatenate 'string "FPS: "
 				 (write-to-string (slot-value updater 'fps)))))
     (draw-string fps-string 0 0))
-  ;;(draw-image "data/space.png" 0  0 :height 1080 :width 1920)
-  )
+  (draw-world-to-screen #'draw-box 1000 1000 10 10 :color "white"))
 						  
   
   

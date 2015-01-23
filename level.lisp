@@ -12,7 +12,8 @@
    ;;(background-image :initform "data/space.png")
    (width :initform 3000)
    (height :initform 3000)
-   (window-scrolling-speed :initform 10)))
+   ;;(window-scrolling-speed :initform 10)
+   ))
 
 (defmethod draw  ((level level))
   (with-slots (width height) level

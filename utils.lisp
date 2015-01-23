@@ -61,8 +61,9 @@
 (defun left-mouse-pressed ()
   (sdl:mouse-left-p))
 
-;;; nice to have for on the spot rectangle coliision
+;;; 
 (defun rect-in-rectangle-p (x y width height o-top o-left o-width o-height)
+  "Nice to have for on the spot rectangle coliision."
   (declare (single-float x y width height o-top o-left o-width o-height)
 	   (optimize (speed 3)))
   (not (or
@@ -71,3 +72,13 @@
 	(<= (+ x width) o-left)
 	(<= (+ o-left o-width) x))))
 
+(defun world-to-screen-coord (x y)
+  "Converts world coordinates to screen coordinates.
+All drawing calls in xelf except for draw-textured-rectangle-*
+seem to draw in position relative to the screen rather than the world."
+  (with-slots (window-x window-y) (current-buffer)
+    (values (- x window-x) (- y window-y))))
+
+(defun draw-world-to-screen (draw-func &rest args)
+  (multiple-value-bind (sx sy) (world-to-screen-coord (first args) (first args))
+    (apply draw-func (cons sx (cons sy (nthcdr 2 args))))))

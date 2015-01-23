@@ -11,6 +11,7 @@
 	       (:file "globals")	       
 	       (:file "updater")
 	       (:file "wall")
+	       (:file "stage")
 	       (:file "cooldown")
 	       (:file "bullet")
 	       (:file "ship")
