@@ -10,10 +10,10 @@
 
 (defclass player (ship)
   ((height
-    :initform 32
+    :initform (units 1)
     :type (unsigned-byte 8))
    (width
-    :initform 32
+    :initform (units 1)
     :type (unsigned-byte 8))
    (color
     :initform '(0 0 0 255)
@@ -28,12 +28,6 @@
     :initform 0.0
     :type short-float)
    (last-y
-    :initform 0.0
-    :type short-float)
-   (point-x
-    :initform 0.0
-    :type short-float) ;;relative pointer positions
-   (point-y
     :initform 0.0
     :type short-float)
    (reload-cooldown
@@ -64,20 +58,19 @@
 			 last-x last-y
 			 x y
 			 color
-			 width height
-			 point-x point-y
-			 reload-cooldown) player
-    (setf point-x (+ (window-pointer-x) (slot-value (current-buffer) 'window-x))
-	  point-y (+ (window-pointer-y) (slot-value (current-buffer) 'window-y))
-	  direction (find-heading (+ x (/ width 2.0))
+			 width height			 
+			 reload-cooldown
+			 off-platform-cooldown) player
+    
+    (setf direction (find-heading (+ x (/ width 2.0))
 				  (+ y (/ height 2.0))
-				  point-x point-y)
+				  (screen-pointer-x) (screen-pointer-y))
 	  last-x x last-y y)
     
     ;; holding up and the cursor is not in the player's bounding rectangle
     (when (and (holding-up-arrow)
 	       (not (rect-in-rectangle-p
-		     (cfloat point-x) (cfloat point-y)
+		     (cfloat (screen-pointer-x)) (cfloat (screen-pointer-y))
 		     (cfloat 1) (cfloat 1)
 		     (cfloat y) (cfloat x)
 		     (cfloat width) (cfloat height))))
@@ -110,13 +103,16 @@
     (when (and (left-mouse-pressed)
 	       (> (cooldown-timer reload-cooldown) (cooldown-time reload-cooldown)))
       (fire player)
-      (setf (cooldown-timer reload-cooldown) 0.0))))
-;; (snap-window-to-node (current-buffer) player)))
-;; (move-window (current-buffer) (- x last-x) (- y last-y)))))
-;;(move-window-to-node (current-buffer) player))
+      (setf (cooldown-timer reload-cooldown) 0.0))
+
+    ;; off platform stuff
+    (incf (cooldown-timer off-platform-cooldown) *dt*)
+    (when (> (cooldown-timer off-platform-cooldown) (cooldown-time off-platform-cooldown))
+      ;; you dead
+      (move-to player 1320 1240))))
 
 (defmethod draw ((player player))
-  (with-slots (x y width height point-x point-y direction color) player
+  (with-slots (x y width height direction color) player
     (draw-textured-rectangle-* x y 0 width height
 			       (find-texture "up") ;;place holder image
 			       :angle (+ 90 (*
@@ -143,3 +139,5 @@
 	   (+ last-x width) (+ y height))
       (move-to player x last-y))))
 
+(defmethod collide ((player player) (stage stage))
+  (call-next-method))

@@ -26,7 +26,7 @@
     (index-pending-resources)
     (let ((level (make-instance 'level)))
       ;;(with-slots (window-scrolling-speed player) level)
-      (follow-with-camera level (slot-value level 'player))
+      (follow-with-camera level (player level))
       (switch-to-buffer level)
       (start-game level))))
 

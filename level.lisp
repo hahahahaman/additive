@@ -7,13 +7,14 @@
    (player
     :initform (make-instance 'player)
     :type player
-    :accessor player)
+    :reader player)
+   (stage
+    :initform (make-instance 'stage)
+    :type stage)
    ;;(background-color :initform "blue")
    ;;(background-image :initform "data/space.png")
    (width :initform 3000)
-   (height :initform 3000)
-   ;;(window-scrolling-speed :initform 10)
-   ))
+   (height :initform 3000)))
 
 (defmethod draw  ((level level))
   (with-slots (width height) level
@@ -21,13 +22,14 @@
   (call-next-method))
 
 (defmethod start-game ((level level))
-  (with-slots (updater player window-x window-y) level
+  (with-slots (updater player stage window-x window-y) level
     (with-buffer level
+      (insert stage)
+      (move-to stage 1000 1000)
       (insert player)
       (move-to player 1320 1240)
-      (paste level (make-border 1000 1000 (- 1000 (units 1)) (- 1000 (units 1))))
+      ;;(paste level (make-border 1000 1000 (- 1000 (units 1)) (- 1000 (units 1))))
       (insert updater)
-      (setf window-x 800 window-y 800))))
-    
+      (setf window-x 800 window-y 800))))    
   
    

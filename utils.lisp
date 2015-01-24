@@ -30,8 +30,18 @@
         ,(let (,@(loop for n in names for g in gensyms collect `(,n ,g)))
            ,@body)))))
 
-;;; unit size for blocks
-(defun units (n) (* *unit* n))
+
+(defun units (n)
+  "Unit size for blocks."
+  (* *unit* n))
+
+(defun screen-pointer-x ()
+  "Pointer position relative to the current-buffer window-x."
+  (+ (window-pointer-x) (slot-value (current-buffer) 'window-x)))
+
+(defun screen-pointer-y ()
+  "Pointer position relative to the current-buffer window-y."
+  (+ (window-pointer-y) (slot-value (current-buffer) 'window-y)))
 
 ;;; keyboard press sensing functions
 (defun holding-down-arrow ()
@@ -61,7 +71,6 @@
 (defun left-mouse-pressed ()
   (sdl:mouse-left-p))
 
-;;; 
 (defun rect-in-rectangle-p (x y width height o-top o-left o-width o-height)
   "Nice to have for on the spot rectangle coliision."
   (declare (single-float x y width height o-top o-left o-width o-height)

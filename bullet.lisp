@@ -10,8 +10,8 @@
     :initarg :color
     :initform (error ":color must be specified.")
     :accessor bullet-color)
-   (width :initform (units 0.4))
-   (height :initform (units 0.4))
+   (width :initform (units 0.25))
+   (height :initform (units 0.25))
    (direction
     :initarg :direction
     :initform (error ":direction must be specified.")

@@ -25,9 +25,10 @@
    (off-platform
     :initform nil)
    (off-platform-cooldown
-    :initform (make-cooldown :time 2.0))))
+    :initform (make-cooldown :time 2.0)
+    :type cooldown)))
 
 (defmethod collide ((ship ship) (stage stage))
-  (with-slots (off-platform-p off-platform-cooldown) ship
+  (with-slots (off-platform off-platform-cooldown) ship
     (setf (cooldown-timer off-platform-cooldown) 0.0
-	  off-platform nil])))
+	  off-platform nil)))
