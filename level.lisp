@@ -1,35 +1,37 @@
 (in-package #:rgbshift)
 
 (defclass level (buffer)
-  ((updater
+  ((width
+    :initform 3000.0)
+   (height
+    :initform 3000.0)
+   (updater
     :initform (make-instance 'updater)
     :type updater)
    (player
     :initform (make-instance 'player)
     :type player
     :reader player)
+   (abyss
+    :initform (make-instance 'abyss)
+    :type abyss)
    (stage
     :initform (make-instance 'stage)
-    :type stage)
-   ;;(background-color :initform "blue")
-   ;;(background-image :initform "data/space.png")
-   (width :initform 3000)
-   (height :initform 3000)))
+    :type stage)))
 
 (defmethod draw  ((level level))
-  (with-slots (width height) level
-    (draw-textured-rectangle-* 0 0 0 width height (find-texture "data/space.png")))
   (call-next-method))
 
 (defmethod start-game ((level level))
-  (with-slots (updater player stage window-x window-y) level
+  (with-slots (width height updater player abyss stage window-x window-y) level
     (with-buffer level
+      (setf (slot-value abyss 'width) width
+	    (slot-value abyss 'width) height)
+      (insert abyss)
       (insert stage)
       (move-to stage 1000 1000)
       (insert player)
       (move-to player 1320 1240)
       ;;(paste level (make-border 1000 1000 (- 1000 (units 1)) (- 1000 (units 1))))
       (insert updater)
-      (setf window-x 800 window-y 800))))    
-  
-   
+      (setf window-x 800 window-y 800))))

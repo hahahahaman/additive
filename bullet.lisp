@@ -18,25 +18,22 @@
     :reader bullet-direction)
    (speed
     :initarg :speed
-    :initform 800
+    :initform 800.0
+    :type single-float
     :reader bullet-speed)
-   (lifespan
-    :initarg :lifespan
-    :initform 0.3
-    :reader bullet-lifespan)
-   (lifetime
-    :initform 0.0
-    :accessor bullet-lifetime)))
+   (lifespan-cooldown
+    :initform (make-cooldown :time 0.3)
+    :type cooldown)))
 
 (defmethod initialize-instance :after ((bullet bullet) &key)
   (setf (bullet-color bullet) (slot-value bullet 'color)))
 
 (defmethod update ((bullet bullet))
-  (incf (bullet-lifetime bullet) *dt*)
-
-  (move bullet (bullet-direction bullet) (* (bullet-speed bullet) *dt*))
-  (when (> (bullet-lifetime bullet) (bullet-lifespan bullet))
-    (remove-node (current-buffer) bullet)))
+  (with-slots (lifespan-cooldown) bullet
+    (move bullet (bullet-direction bullet) (* (bullet-speed bullet) *dt*))
+    (incf (cooldown-timer lifespan-cooldown) *dt*)
+    (when (> (cooldown-timer lifespan-cooldown) (cooldown-time lifespan-cooldown))
+      (remove-node (current-buffer) bullet))))
 
 (defmethod draw ((bullet bullet))
   (with-slots (x y width height direction) bullet

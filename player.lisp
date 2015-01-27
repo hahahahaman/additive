@@ -104,12 +104,7 @@
 	       (> (cooldown-timer reload-cooldown) (cooldown-time reload-cooldown)))
       (fire player)
       (setf (cooldown-timer reload-cooldown) 0.0))
-
-    ;; off platform stuff
-    (incf (cooldown-timer off-platform-cooldown) *dt*)
-    (when (> (cooldown-timer off-platform-cooldown) (cooldown-time off-platform-cooldown))
-      ;; you dead
-      (move-to player 1320 1240))))
+    (call-next-method)))
 
 (defmethod draw ((player player))
   (with-slots (x y width height direction color) player
