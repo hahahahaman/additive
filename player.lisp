@@ -120,10 +120,13 @@
 			       :tex-h (find-resource-property "up" :height)
 			       :clip-x 9 :clip-y 9 :clip-w 45 :clip-h 45
 			       :vertex-color color)
-    (when (> (cooldown-timer death-cooldown) 0.1)
-      (draw-textured-rectangle 0 0 0 *width* *height*
-			       (find-texture "data/dying-overlay.png")
-			       :vertex-color "black"))))
+    
+    (when (> (cooldown-timer death-cooldown) 0.2)
+      (let ((overlay-alpha (* 255 (/ (cooldown-timer death-cooldown)
+				     (cooldown-time death-cooldown)))))	
+	(draw-textured-rectangle 0 0 0 *width* *height*
+				 (find-texture "data/dying-overlay.png")
+				 :vertex-color `(0.0 0.0 0.0 ,overlay-alpha))))))
 
 (defmethod collide ((player player) (wall wall))
   (with-slots (direction speed last-x last-y x y width height) player

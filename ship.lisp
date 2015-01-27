@@ -23,7 +23,7 @@
     :initform 0.0
     :type short-float)
    (death-cooldown
-    :initform (make-cooldown :time 2.0)
+    :initform (make-cooldown :time 5.0)
     :type cooldown)
    (death-reset-cooldown
     :initform (make-cooldown :time 1.0))
