@@ -35,11 +35,14 @@
 
 (defmethod die ((ship ship))
   ;; TODO: die
-  (move-to ship 1320 1240))
+  (with-slots (death-cooldown
+	       death-reset-cooldown) ship
+    (setf (cooldown-timer death-reset-cooldown) 0.0
+	  (cooldown-timer death-cooldown) 0.0)
+    (move-to ship 1320 1240)))
 
 (defmethod update ((ship ship))
-  (with-slots (off-platform
-	       death-cooldown
+  (with-slots (death-cooldown
 	       death-reset-cooldown
 	       death-reset-speed) ship
     ;; when off stage
@@ -51,26 +54,27 @@
       ;; you dead
       (die ship))))
 
+(defmethod draw ((ship ship))
+  t)
+
 (defmethod collide ((ship ship) (stage stage))
   "The ship is on the stage."
-  (with-slots (off-platform
-	       death-cooldown
+  (with-slots (death-cooldown
 	       death-reset-cooldown
 	       death-reset-speed) ship
-    (with-slots (x y height width) stage
-      ;; if the ship gets knocked off and comes back to stage
-      ;; takes time for the reset period to start
-      (when (> (cooldown-timer death-cooldown) 0.0)
-	;; if resetting is occuring
-	(if (< (cooldown-timer death-reset-cooldown)
-	       (cooldown-time death-reset-cooldown))	   
-	    (incf (cooldown-timer death-reset-cooldown) *dt*) ;; closer to resetting
-	    (progn ;; actually reset	      
-	      (decf (cooldown-timer death-cooldown) (* death-reset-speed *dt*))
-	      (when (<= (cooldown-timer death-cooldown) 0.0)
-		
-		(setf (cooldown-timer death-cooldown) 0.0
-		      (cooldown-timer death-reset-cooldown) 0.0))))))))
+    ;; if the ship gets knocked off and comes back to stage
+    ;; takes time for the reset period to start
+    (when (> (cooldown-timer death-cooldown) 0.0)
+      ;; if resetting is occuring
+      (if (< (cooldown-timer death-reset-cooldown)
+	     (cooldown-time death-reset-cooldown))	   
+	  (incf (cooldown-timer death-reset-cooldown) *dt*) ;; closer to resetting
+	  (progn ;; actually reset	      
+	    (decf (cooldown-timer death-cooldown) (* death-reset-speed *dt*))
+	    (when (<= (cooldown-timer death-cooldown) 0.0)
+	      
+	      (setf (cooldown-timer death-cooldown) 0.0
+		    (cooldown-timer death-reset-cooldown) 0.0)))))))
 
 ;; (defmethod collide ((ship ship) (abyss abyss))
 ;;   "The ship is off the stage."

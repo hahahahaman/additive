@@ -107,7 +107,10 @@
     (call-next-method)))
 
 (defmethod draw ((player player))
-  (with-slots (x y width height direction color) player
+  (with-slots (x y width height direction color
+	       death-cooldown
+	       death-reset-cooldown
+	       death-reset-speed) player
     (draw-textured-rectangle-* x y 0 width height
 			       (find-texture "up") ;;place holder image
 			       :angle (+ 90 (*
@@ -116,7 +119,11 @@
 			       :tex-w (find-resource-property "up" :width)
 			       :tex-h (find-resource-property "up" :height)
 			       :clip-x 9 :clip-y 9 :clip-w 45 :clip-h 45
-			       :vertex-color color)))
+			       :vertex-color color)
+    (when (> (cooldown-timer death-cooldown) 0.1)
+      (draw-textured-rectangle 0 0 0 *width* *height*
+			       (find-texture "data/dying-overlay.png")
+			       :vertex-color "black"))))
 
 (defmethod collide ((player player) (wall wall))
   (with-slots (direction speed last-x last-y x y width height) player

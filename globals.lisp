@@ -14,3 +14,4 @@
 
 (defresource "data/square.png")
 (defresource "data/space.png")
+(defresource "data/dying-overlay.png")
