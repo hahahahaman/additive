@@ -13,14 +13,13 @@
     :initform 0.0
     :type single-float)
    (width
-    :initform 1000.0
+    :initform 800.0
     :type single-float)
    (height
-    :initform 1000.0
+    :initform 800.0
     :type single-float)
    (color
-    :initform '(255 255 255 255)
-    :type list)))
+    :initform '(255 255 255 255))))
 
 (defmethod update ((stage stage))
   (call-next-method)) 

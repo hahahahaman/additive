@@ -1,13 +1,13 @@
 ;;;
 ;;; wall.lisp
-;;; Rectangle that prevent movement
-;;;
+;;; 
+;;; Rectangle that prevents movement
 
 (in-package #:rgbshift)
 
 (defclass wall (node)
   ((color
-    :initform '(0 0 0 255)
+    :initform "black"
     :accessor wall-color)))
 
 (defmethod draw ((wall wall))
@@ -16,15 +16,15 @@
 			       :vertex-color color)))
      ;;(draw-image "splash.png" :width width :height height)))
 
-;;; create and return wall instance
 (defun make-wall (x y width height)
+  "Create and return wall instance."
   (let ((wall (make-instance 'wall)))
     (resize wall width height)
     (move-to wall x y)
     wall))
 
-;;; create a rectangular enclosing
 (defun make-border (x y width height)
+  "Create a rectangular enclosing."
   (let ((left x)
 	(top y)
 	(right (+ x width))

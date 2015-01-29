@@ -32,6 +32,7 @@
       (move-to stage 1000 1000)
       (insert player)
       (move-to player 1320 1240)
+      (insert (make-wall 1000 1000 40 40))
       ;;(paste level (make-border 1000 1000 (- 1000 (units 1)) (- 1000 (units 1))))
       (insert updater)
       (setf window-x 800 window-y 800))))

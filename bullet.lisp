@@ -10,19 +10,24 @@
     :initarg :color
     :initform (error ":color must be specified.")
     :accessor bullet-color)
-   (width :initform (units 0.25))
-   (height :initform (units 0.25))
+   (width
+    :initarg width
+    :initform (bullet-size))
+   (height
+    :initarg height
+    :initform (bullet-size))
    (direction
     :initarg :direction
     :initform (error ":direction must be specified.")
     :reader bullet-direction)
-   (speed
+   (current-speed
     :initarg :speed
-    :initform 800.0
+    :initform 600.0
     :type single-float
-    :reader bullet-speed)
+    :reader bullet-current-speed)
    (lifespan-cooldown
-    :initform (make-cooldown :time 0.3)
+    :initarg lifespan-cooldown
+    :initform (make-cooldown :time 0.2)
     :type cooldown)))
 
 (defmethod initialize-instance :after ((bullet bullet) &key)
@@ -30,7 +35,7 @@
 
 (defmethod update ((bullet bullet))
   (with-slots (lifespan-cooldown) bullet
-    (move bullet (bullet-direction bullet) (* (bullet-speed bullet) *dt*))
+    (move bullet (bullet-direction bullet) (* (bullet-current-speed bullet) *dt*))
     (incf (cooldown-timer lifespan-cooldown) *dt*)
     (when (> (cooldown-timer lifespan-cooldown) (cooldown-time lifespan-cooldown))
       (remove-node (current-buffer) bullet))))
@@ -42,12 +47,7 @@
 			     :vertex-color (bullet-color bullet))))
 
 (defmethod collide ((bullet bullet) (wall wall))  
-  (flet ((add-color-list (ll rl)
-  	   (let ((return-value '()))
-  	     (loop for i from 0 to (1- (length ll)) do
-  		  (setf return-value (cons (+ (* 0.1 (nth i ll)) (+ (nth i rl))) return-value)))
-  	     (reverse return-value))))
-    (setf (wall-color wall) (add-color-list (bullet-color bullet) (wall-color wall))))
+  (setf (wall-color wall) (add-rgba-color-list (bullet-color bullet) (wall-color wall)))
   (remove-node (current-buffer) bullet))
 	 
 
