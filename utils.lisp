@@ -76,10 +76,10 @@
   (keyboard-down-p :e))
 
 (defun holding-down-left-arrow ()
-  (keyboard-down-p :z))
+  (keyboard-down-p :a))
 
 (defun holding-down-right-arrow ()
-  (keyboard-down-p :c))
+  (keyboard-down-p :d))
 
 (defun left-mouse-pressed ()
   (sdl:mouse-left-p))

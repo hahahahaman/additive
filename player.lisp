@@ -10,15 +10,15 @@
 
 (defclass player (ship)
   ((height
-    :initform (units 1)
+    :initform (units 1.5)
     :type (unsigned-byte 8))
    (width
-    :initform (units 1)
+    :initform (units 1.5)
     :type (unsigned-byte 8))
    (color
     :initform '(0 0 0 255))
    (current-speed
-    :initform 400.0
+    :initform 300.0
     :type short-float)
    (direction
     :initform 0.0
@@ -28,7 +28,7 @@
    (last-y
     :initform 0.0)
    (reload-cooldown
-    :initform (make-cooldown :time 0.55)
+    :initform (make-cooldown :time 1.01)
     :type cooldown)
    (bullet-color-index
     :initform 0
@@ -37,7 +37,18 @@
     :initform (make-array 4
 			  :element-type 'cooldown
 			  :initial-contents (loop for i from 0 to 3
-					      collect (make-cooldown :time 0.5))))))
+					       collect (make-cooldown :time 3.13))))
+   (shift-color
+    :initform (make-array 4
+			  :element-type 'fixnum
+			  :initial-contents '(-1 1 -1 1)))
+   (shift-dir
+    :initform (make-array 4
+			  :element-type 'double-float
+			  :initial-contents `(,(- (* 1/4 pi))
+					      ,(- (* 3/4 pi))
+					      ,(* 3/4 pi)
+					      ,(* 1/4 pi))))))
 
 (defgeneric fire (player))
 
@@ -56,10 +67,10 @@
       (insert bullet)
       
       ;; scaled so that bullet isn't in player hitbox
-      (multiple-value-bind (new-x new-y) (rotate-point-ccw 0
-							   (* sqrt2
-							      (- (/ height -2) (bullet-size)))
-							   angle)
+      (multiple-value-bind (new-x new-y)
+	  (rotate-point-ccw 0
+			    (* sqrt2 (- (/ height -2) (bullet-size)))
+			    angle)
 	(move-to bullet
 		 (+ center-x new-x)
 		 (+ center-y new-y))))))
@@ -67,22 +78,20 @@
 (defgeneric teleport (player shift-index))
 
 (defmethod teleport ((player player) shift-index)
-  (with-slots (last-x last-y x y direction bullet-color-index shift-cooldowns) player
-    (setf bullet-color-index (mod (+ (ecase shift-index
-				       (0 -1)
-				       (1 -1)
-				       (2 1)
-				       (3 1))
-				     bullet-color-index) 3)
+  (with-slots
+	(last-x last-y x y direction bullet-color-index
+		shift-cooldowns shift-color shift-dir) player
+    (setf bullet-color-index (mod (+ bullet-color-index (aref shift-color shift-index)) 3)
 	  (cooldown-timer (aref shift-cooldowns shift-index)) 0.0)
     (fire player)
     (setf last-x x last-y y)
-    (move player (ecase shift-index
-		   (0 (- direction (* 1/4 pi)))
-		   (1 (- direction (* 3/4 pi)))
-		   (2 (+ direction (* 3/4 pi)))
-		   (3 (+ direction (* 1/4 pi))))
-	  100)))
+    (move player (+ direction (aref shift-dir shift-index)) 100)))
+
+(defmethod die ((player player))
+  (with-slots (shift-cooldowns) player
+    (loop for cd across shift-cooldowns do
+	 (setf (cooldown-timer cd) 0.0)))
+  (call-next-method))
 
 (defmethod update ((player player))
   (with-slots (direction
@@ -135,7 +144,7 @@
       (incf (cooldown-timer reload-cooldown) *dt*))
 
     (loop for cd across shift-cooldowns do
-	 ;;(format t "~a~%" (cooldown-timer cd))
+       ;;(format t "~a~%" (cooldown-timer cd))
 	 (when (< (cooldown-timer cd) (cooldown-time cd))
 	   (incf (cooldown-timer cd) *dt*)))
     
@@ -146,15 +155,15 @@
 	   (setf (cooldown-timer reload-cooldown) 0.0))
 	  ((and (> (cooldown-timer (aref shift-cooldowns 0)) ;; q
 		   (cooldown-time (aref shift-cooldowns 0)))
-		(holding-up-left-arrow))
+		(holding-up-left-arrow))	   
 	   (teleport player 0))
-	  ((and (> (cooldown-timer (aref shift-cooldowns 1)) ;; z
+	  ((and (> (cooldown-timer (aref shift-cooldowns 1)) ;; a
 		   (cooldown-time (aref shift-cooldowns 1)))
 		(holding-down-left-arrow))
 	   (teleport player 1))
-	  ((and (> (cooldown-timer (aref shift-cooldowns 2)) ;; c
-		  (cooldown-time (aref shift-cooldowns 2)))
-	    (holding-down-right-arrow))
+	  ((and (> (cooldown-timer (aref shift-cooldowns 2)) ;; d
+		   (cooldown-time (aref shift-cooldowns 2)))
+		(holding-down-right-arrow))
 	   (teleport player 2))
 	  ((and (> (cooldown-timer (aref shift-cooldowns 3)) ;; e
 		   (cooldown-time (aref shift-cooldowns 3)))
@@ -163,10 +172,14 @@
     (call-next-method)))
 
 (defmethod draw ((player player))
-  (with-slots (x y width height direction color
-	       death-cooldown
-	       death-reset-cooldown
-	       death-reset-current-speed) player
+  (with-slots (x y width height direction color		 
+		 death-cooldown
+		 death-reset-cooldown
+		 death-reset-speed
+		 bullet-color-index
+		 reload-cooldown
+		 shift-color
+		 shift-cooldowns) player
     (draw-textured-rectangle-* x y 0 width height
 			       (find-texture "up") ;;place holder image
 			       :angle (radians->degrees (+ (/ pi 2) direction))
@@ -180,11 +193,40 @@
 				     (cooldown-time death-cooldown)))))	
 	(draw-textured-rectangle 0 0 0 *width* *height*
 				 (find-texture "data/dying-overlay.png")
-				 :vertex-color `(0.0 0.0 0.0 ,overlay-alpha))))))
+				 :vertex-color `(0.0 0.0 0.0 ,overlay-alpha))))
+    
+    ;; cooldown ui
+    (let ((alphas (loop for cd across shift-cooldowns
+		     collect (if (< (cooldown-timer cd) (cooldown-time cd))
+				 (* 100.0 (/ (cooldown-timer cd) (cooldown-time cd)))
+				 255.0)))
+	  (reload-alpha (if (< (cooldown-timer reload-cooldown) (cooldown-time reload-cooldown))
+			    (* 100.0
+			       (/ (cooldown-timer reload-cooldown) (cooldown-time reload-cooldown)))
+			    255.0))
+	  (ui-size (units 1.7)))
+      (flet ((get-cd-ui-color (index)
+	       (ecase (mod (+ bullet-color-index (aref shift-color index)) 3)
+		 (0 `(255 0 0 ,(elt alphas index)))
+		 (1 `(0 255 0 ,(elt alphas index)))
+		 (2 `(0 0 255 ,(elt alphas index))))))		
+	(draw-box 0 (- *height* (* ui-size 2)) ui-size ui-size
+		  :color (get-cd-ui-color 0))
+	(draw-box 0 (- *height* ui-size) ui-size ui-size
+		  :color (get-cd-ui-color 1))
+	(draw-box ui-size (- *height* ui-size) ui-size ui-size
+		  :color (get-cd-ui-color 2))
+	(draw-box ui-size (- *height* (* ui-size 2)) ui-size ui-size
+		  :color (get-cd-ui-color 3)))
+      (draw-box (- *width* ui-size) (- *height* ui-size) ui-size ui-size
+		:color (ecase bullet-color-index
+			 (0 `(255 0 0 ,reload-alpha))
+			 (1 `(0 255 0 ,reload-alpha))
+			 (2 `(0 0 255 ,reload-alpha)))))))
 
 (defmethod collide ((player player) (wall wall))
   (with-slots (direction current-speed last-x last-y x y width height) player
-    (format t "~a ~a~%" last-x last-y)
+    ;;(format t "~a ~a~%" last-x last-y)
     ;; x movement pass
     (when (colliding-with-bounding-box-p 
 	   wall
@@ -203,3 +245,4 @@
 
 (defmethod collide ((player player) (stage stage))
   (call-next-method))
+

@@ -24,7 +24,7 @@
     :type cooldown)
    (death-reset-cooldown
     :initform (make-cooldown :time 1.0))
-   (death-reset-current-speed
+   (death-reset-speed
     :initform 2.0
     :type 'single-float)))
 
@@ -50,7 +50,7 @@
 (defmethod update ((ship ship))
   (with-slots (death-cooldown
 	       death-reset-cooldown
-	       death-reset-current-speed) ship
+	       death-reset-speed) ship
     ;; when off stage
     (when (not (colliding-with-p ship (slot-value (current-buffer) 'stage)))
       (setf (cooldown-timer death-reset-cooldown) 0.0) ;; reset the resetter
@@ -67,7 +67,7 @@
   "The ship is on the stage."
   (with-slots (death-cooldown
 	       death-reset-cooldown
-	       death-reset-current-speed) ship
+	       death-reset-speed) ship
     ;; if the ship gets knocked off and comes back to stage
     ;; takes time for the reset period to start
     (when (> (cooldown-timer death-cooldown) 0.0)
@@ -76,7 +76,7 @@
 	     (cooldown-time death-reset-cooldown))	   
 	  (incf (cooldown-timer death-reset-cooldown) *dt*) ;; closer to resetting
 	  (progn ;; actually reset	      
-	    (decf (cooldown-timer death-cooldown) (* death-reset-current-speed *dt*))
+	    (decf (cooldown-timer death-cooldown) (* death-reset-speed *dt*))
 	    (when (<= (cooldown-timer death-cooldown) 0.0)
 	      
 	      (setf (cooldown-timer death-cooldown) 0.0
@@ -87,7 +87,7 @@
 ;;   (with-slots (off-platform
 ;; 	       death-cooldown
 ;; 	       death-reset-cooldown
-;; 	       death-reset-current-speed) ship
+;; 	       death-reset-speed) ship
 ;;     (setf off-platform T)
 ;;     (when off-platform
 ;;       (print (cooldown-timer death-cooldown))
