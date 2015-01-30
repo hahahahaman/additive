@@ -3,7 +3,7 @@
 ;;;
 ;;; The part of the level that isn't the stage.
 
-(in-package #:rgbshift)
+(in-package #:additive)
 
 (defclass abyss (node)
   ((x

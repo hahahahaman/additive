@@ -3,7 +3,7 @@
 ;;; 
 ;;; Rectangle that prevents movement
 
-(in-package #:rgbshift)
+(in-package #:additive)
 
 (defclass wall (node)
   ((color

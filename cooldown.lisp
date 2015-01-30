@@ -3,7 +3,7 @@
 ;;;
 ;;; Timer and cooldown time
 
-(in-package #:rgbshift)
+(in-package #:additive)
 
 (defstruct cooldown
   "Stores the time before cooldown is refreshed, cooldown-time,

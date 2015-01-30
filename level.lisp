@@ -1,4 +1,4 @@
-(in-package #:rgbshift)
+(in-package #:additive)
 
 (defclass level (buffer)
   ((width

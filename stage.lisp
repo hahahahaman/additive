@@ -3,7 +3,7 @@
 ;;;
 ;;; Denotes the area that ships can fly on.
 
-(in-package #:rgbshift)
+(in-package #:additive)
 
 (defclass stage (node)
   ((x

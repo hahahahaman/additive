@@ -3,7 +3,7 @@
 ;;;
 ;;; Useful macros and functions
 
-(in-package #:rgbshift)
+(in-package #:additive)
 
 (defmacro continuable (&body body)
   "Helper macro that we can use to allow us to continue from an
@@ -132,8 +132,8 @@ seem to draw in position relative to the screen rather than the world."
 
 (defun add-rgb-color-list (a b)
   (let ((return-value '())
-	(a-color-list (get-rgba-color-list a))
-	(b-color-list (get-rgba-color-list b)))
+	(a-color-list (get-rgb-color-list a))
+	(b-color-list (get-rgb-color-list b)))
     (loop for i from 0 to 2 do
 	 (setf return-value (cons (+ (* 0.03 (nth i a-color-list)) (nth i b-color-list)) return-value)))
     (reverse return-value)))

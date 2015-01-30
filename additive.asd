@@ -1,7 +1,7 @@
-;;;; rgbshift.asd
+;;;; additive.asd
 
-(asdf:defsystem #:rgbshift
-  :description "Describe rgbshift here"
+(asdf:defsystem #:additive
+  :description "Describe additive here"
   :author "Your Name <your.name@example.com>"
   :license "Licenseless Rider"
   :depends-on (#:xelf)
@@ -18,5 +18,5 @@
 	       (:file "ship")
 	       (:file "player")
 	       (:file "level")
-               (:file "rgbshift")))
+               (:file "additive")))
 

@@ -4,7 +4,7 @@
 ;;; The player derived from a ship since it is a ship.
 ;;; File includes movement functions as well.
 
-(in-package #:rgbshift)
+(in-package #:additive)
 
 ;;; Keyboard press sensing functions
 

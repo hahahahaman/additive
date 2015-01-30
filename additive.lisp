@@ -1,33 +1,36 @@
-;;;; rgbshift.lisp
+;;;; additive.lisp
 
-(in-package #:rgbshift)
+(in-package #:additive)
 
 ;;; Hacks and glory await!
+
+(defparameter *width* 1280)
+(defparameter *height* 768)
 
 (defun set-screen-dim (w h)
   (setf *width* w)
   (setf *height* h)
-  (setf *screen-height* h)
-  (setf *screen-width* w)
-  (setf *gl-screen-width* w)
-  (setf *gl-screen-height* h))
+  (setf xelf:*screen-height* h)
+  (setf xelf:*screen-width* w)
+  (setf xelf:*gl-screen-width* w)
+  (setf xelf:*gl-screen-height* h))
 
 ;; the game
-(defun rgbshift ()
-  (set-screen-dim *width* *height*)
+(defun additive ()
+  (set-screen-dim 800 600)
 
   (setf *resizable* t)
   (setf *scale-output-to-window* t)
   (setf *fullscreen* nil)
   (setf *frame-rate* 60)
   (setf *window-title* "additive color")
+
   (with-session
-    (open-project :rgbshift)
+    (open-project :additive)
     (index-pending-resources)
     (let ((level (make-instance 'level)))
-      ;;(with-slots (window-scrolling-speed player) level)
-      (follow-with-camera level (player level))
       (switch-to-buffer level)
+      (follow-with-camera level (slot-value level 'player))
       (start-game level))))
 
     

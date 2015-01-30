@@ -1,6 +1,6 @@
 ;;;; package.lisp
 
-(defpackage #:rgbshift
+(defpackage #:additive
   (:use #:cl #:xelf)
-  (:export #:rgbshift))
+  (:export #:additive))
 

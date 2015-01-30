@@ -2,7 +2,7 @@ Prototyping a top down fighting game kind of like sumo with teleportation and co
 
 Some code to start up a devel session.
 (progn (ql:quickload :xelf)
-       (ql:quickload :rgbshift)
+       (ql:quickload :additive)
        (ql:quickload :plong)
        (ql:quickload :lispbuilder-sdl-examples))
        

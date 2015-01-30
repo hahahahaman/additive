@@ -3,7 +3,7 @@
 ;;;
 ;;; rgb colored bullets fired from ships
 
-(in-package #:rgbshift)
+(in-package #:additive)
 
 (defclass bullet (node)
   ((color

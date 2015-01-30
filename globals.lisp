@@ -3,7 +3,7 @@
 ;;;
 ;;; Dynamic scope variables and such.
 
-(in-package #:rgbshift)
+(in-package #:additive)
 
 (defparameter *width* 800)
 (defparameter *height* 600)

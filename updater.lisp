@@ -5,7 +5,7 @@
 ;;; so that it can be updated during the buffers update function.
 ;;; Useful for fps counting and possibly debug drawing.
 
-(in-package #:rgbshift)
+(in-package #:additive)
 
 (defclass updater (node)
   ((height :initform 1) ;; these should be set for drawing
