@@ -20,7 +20,7 @@
   (setf *scale-output-to-window* t)
   (setf *fullscreen* nil)
   (setf *frame-rate* 60)
-
+  (setf *window-title* "additive color")
   (with-session
     (open-project :rgbshift)
     (index-pending-resources)

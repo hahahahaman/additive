@@ -65,9 +65,18 @@
 
 (defun holding-right-arrow()
   (or (joystick-button-pressed-p :right)
-      (keyboar-down-p :kp6)
+      (keyboard-down-p :kp6)
       (keyboard-down-p :right)
       (keyboard-down-p :a)))
+
+(defun pressed-left-arrow ()
+  (keyboard-pressed-p :a))
+
+(defun pressed-right-arrow ()
+  (keyboard-pressed-p :d))
+
+(defun pressed-down-arrow ()
+  (keyboard-pressed-p :s))
 
 (defun holding-up-left-arrow ()
   (keyboard-down-p :q))
@@ -76,15 +85,15 @@
   (keyboard-down-p :e))
 
 (defun holding-down-left-arrow ()
-  (keyboard-down-p :a))
+  (keyboard-down-p :z))
 
 (defun holding-down-right-arrow ()
-  (keyboard-down-p :d))
+  (keyboard-down-p :c))
 
-(defun left-mouse-pressed ()
+(defun holding-left-mouse ()
   (sdl:mouse-left-p))
 
-(defun right-mouse-pressed ()
+(defun holding-right-mouse ()
   (sdl:mouse-right-p))
 
 (defun rect-in-rectangle-p (x y width height o-top o-left o-width o-height)
@@ -108,14 +117,20 @@ seem to draw in position relative to the screen rather than the world."
   (multiple-value-bind (sx sy) (world-to-screen-coord (first args) (first args))
     (apply draw-func (cons sx (cons sy (nthcdr 2 args))))))
 
-(defun get-rgba-color-list (color)
+(defun enum-rgb (index &optional (alpha 255.0))
+  (ecase (mod index 3)
+    (0 `(255.0 0.0 0.0 ,alpha))
+    (1 `(0.0 255.0 0.0 ,alpha))
+    (2 `(0.0 0.0 255.0 ,alpha))))
+
+(defun get-rgb-color-list (color)
   "Converts string colors to list form."
   (if (stringp color)
       (mapcar #'(lambda (n) (* n 255.0))
 	      (gl-color-values-from-string color))
       color))
 
-(defun add-rgba-color-list (a b)
+(defun add-rgb-color-list (a b)
   (let ((return-value '())
 	(a-color-list (get-rgba-color-list a))
 	(b-color-list (get-rgba-color-list b)))

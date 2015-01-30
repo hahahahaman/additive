@@ -47,7 +47,7 @@
 			     :vertex-color (bullet-color bullet))))
 
 (defmethod collide ((bullet bullet) (wall wall))  
-  (setf (wall-color wall) (add-rgba-color-list (bullet-color bullet) (wall-color wall)))
+  (setf (wall-color wall) (add-rgb-color-list (bullet-color bullet) (wall-color wall)))
   (remove-node (current-buffer) bullet))
 	 
 
