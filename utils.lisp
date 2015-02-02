@@ -11,12 +11,12 @@
   `(restart-case
        (progn ,@body) (continue () :report "Continue")))
 
-(defun update-swank ()
-  "Called from within the main loop, this keep the lisp repl running"
-  (continuable
-   (let ((connection (or swank::*emacs-connection* (swank::default-connection))))
-     (when connection
-       (swank::handle-requests connection t)))))
+;; (defun update-swank ()
+;;   "Called from within the main loop, this keep the lisp repl running"
+;;   (continuable
+;;    (let ((connection (or swank::*emacs-connection* (swank::default-connection))))
+;;      (when connection
+;;        (swank::handle-requests connection t)))))
 
 (defmacro with-gensyms ((&rest names) &body body)
   `(let ,(loop for n in names collect `(,n (gensym)))
@@ -114,7 +114,7 @@ seem to draw in position relative to the screen rather than the world."
     (values (- x window-x) (- y window-y))))
 
 (defun draw-world-to-screen (draw-func &rest args)
-  (multiple-value-bind (sx sy) (world-to-screen-coord (first args) (first args))
+  (multiple-value-bind (sx sy) (world-to-screen-coord (first args) (second args))
     (apply draw-func (cons sx (cons sy (nthcdr 2 args))))))
 
 (defun enum-rgb (index &optional (alpha 255.0))
@@ -135,7 +135,10 @@ seem to draw in position relative to the screen rather than the world."
 	(a-color-list (get-rgb-color-list a))
 	(b-color-list (get-rgb-color-list b)))
     (loop for i from 0 to 2 do
-	 (setf return-value (cons (+ (* 0.03 (nth i a-color-list)) (nth i b-color-list)) return-value)))
+	 (setf return-value (cons (+ (* (log (1+ (nth i b-color-list)) 10)
+					(log (1+ (nth i a-color-list))10))
+				     (* (log (1+ (nth i a-color-list)) 2)) (nth i b-color-list))
+				  return-value)))
     (reverse return-value)))
 
 (defun radians->degrees (radians)

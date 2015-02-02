@@ -1,0 +1,6 @@
+w - move towards cursor
+q,z,c,e - shift at angle based on current angle of player
+a,d - shift color without shifting position
+Left-mouse - fire
+
+Try to knock the enemies off of the stage. Try not to get knocked off the stage.

@@ -15,6 +15,11 @@
   (setf xelf:*gl-screen-width* w)
   (setf xelf:*gl-screen-height* h))
 
+(eval-when (:load-toplevel) 
+  (setf *current-directory*
+	(make-pathname
+	 :directory (pathname-directory #.#P"./"))))
+
 ;; the game
 (defun additive ()
   (set-screen-dim 800 600)
@@ -27,10 +32,14 @@
 
   (with-session
     (open-project :additive)
+    (index-all-images)
+    (index-all-samples)
     (index-pending-resources)
+    ;;(preload-resources)
     (let ((level (make-instance 'level)))
       (switch-to-buffer level)
       (follow-with-camera level (slot-value level 'player))
-      (start-game level))))
+      (start-game level)
+      (play-music "song.ogg" :loop t))))
 
     

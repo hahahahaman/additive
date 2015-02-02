@@ -17,7 +17,7 @@
     :type (unsigned-byte 8))
    (color
     :initform '(0 0 0 255))
-   (current-speed
+   (max-speed
     :initform 300.0
     :type short-float)
    (direction
@@ -36,7 +36,7 @@
    (shift-cooldowns
     :initform (make-array 4
 			  :element-type 'cooldown
-			  :initial-contents (loop for i from 0 to 3
+			  :initial-contents (loop repeat 4
 					       collect (make-cooldown :time 3.13))))
    (shift-color
     :initform (make-array 4
@@ -49,8 +49,6 @@
 					      ,(- (* 3/4 pi))
 					      ,(* 3/4 pi)
 					      ,(* 1/4 pi))))))
-
-(defgeneric fire (player))
 
 (defmethod fire ((player player))
   (with-slots (direction x y width height bullet-type reload-cooldown) player
@@ -70,14 +68,18 @@
 			    angle)
 	(move-to bullet
 		 (+ center-x new-x)
-		 (+ center-y new-y))))))
+		 (+ center-y new-y))))
+
+    (ecase bullet-type
+      (0 (play-sample "beepr.wav"))
+      (1 (play-sample "beepg.wav"))
+      (2 (play-sample "beepb.wav")))))
 
 (defgeneric teleport (player shift-index))
 
 (defmethod teleport ((player player) shift-index)
-  (with-slots
-	(last-x last-y x y direction bullet-type
-		shift-cooldowns shift-color shift-dir) player
+  (with-slots (last-x last-y x y direction bullet-type
+		      shift-cooldowns shift-color shift-dir) player
     (setf bullet-type (mod (+ bullet-type (aref shift-color shift-index)) 3)
 	  (cooldown-timer (aref shift-cooldowns shift-index)) 0.0)
     (fire player)
@@ -85,15 +87,16 @@
     (move player (+ direction (aref shift-dir shift-index)) 100)))
 
 (defmethod die ((player player))
-  (with-slots (shift-cooldowns reload-cooldown) player
+  (with-slots (x y shift-cooldowns reload-cooldown) player
     (loop for cd across shift-cooldowns do
 	 (setf (cooldown-timer cd) 0.0))
-    (setf (cooldown-timer reload-cooldown) 0.0))
-  (call-next-method))
+    (setf (cooldown-timer reload-cooldown) 0.0)
+    (call-next-method)
+    (move-window-to (current-buffer) (- x (/ *width* 2)) (- y (/ *height* 2)))))
 
 (defmethod update ((player player))
   (with-slots (direction
-	       current-speed
+	       max-speed
 	       last-x last-y
 	       x y
 	       color
@@ -101,7 +104,8 @@
 	       reload-cooldown
 	       off-platform-cooldown
 	       bullet-type
-	       shift-cooldowns) player
+	       shift-cooldowns
+	       stun-lock) player
     
     (setf direction (find-heading (+ x (/ width 2.0))
 				  (+ y (/ height 2.0))
@@ -109,14 +113,16 @@
 	  last-x x last-y y)
     
     ;; holding up and the cursor is not in the player's bounding rectangle
-    (when (and (holding-up-arrow)
+    (if (and (holding-up-arrow)
 	       (not (rect-in-rectangle-p
 		     (cfloat (screen-pointer-x)) (cfloat (screen-pointer-y))
 		     (cfloat 1) (cfloat 1)
 		     (cfloat y) (cfloat x)
-		     (cfloat width) (cfloat height))))
-      (move player direction (* current-speed *dt*)))
-
+		     (cfloat width) (cfloat height)))
+	       (>= (cooldown-timer stun-lock) (cooldown-time stun-lock)))
+	(move player direction (* max-speed *dt*))
+	(incf (cooldown-timer stun-lock) *dt*))
+    
     ;; adjust the camera so that player remains in the center
     ;; (let ((cam-diff-x (- (+ (/ width 2.0) x) (slot-value (current-buffer) 'window-x)))
     ;; 	  (cam-diff-y (- (+ (/ width 2.0) y) (slot-value (current-buffer) 'window-y))))
@@ -125,16 +131,16 @@
     ;; 		      (cond ((< (- (/ *screen-height* 2.0) cam-diff-y) (/ *screen-height* 15.0))
     ;; 			     (slot-value (current-buffer) 'window-y))
     ;; 			    ((> cam-nndiff-y (/ *screen-height* 2.0))
-    ;; 			     (+ (slot-value (current-buffer) 'window-y) (* (/ current-speed 1.5) *dt*)))
+    ;; 			     (+ (slot-value (current-buffer) 'window-y) (* (/ max-speed 1.5) *dt*)))
     ;; 			    ((< cam-diff-y (/ *screen-height* 2.0))
-    ;; 			     (- (slot-value (current-buffer) 'window-y) (* (/ current-speed 1.5) *dt*)))))
+    ;; 			     (- (slot-value (current-buffer) 'window-y) (* (/ max-speed 1.5) *dt*)))))
     ;;   (move-window-to (current-buffer)
     ;; 		      (cond ((< (- (/ *screen-height* 2.0) cam-diff-x) (/ *screen-height* 15.0))
     ;; 			     (slot-value (current-buffer) 'window-x))
     ;; 			    ((> cam-diff-x (/ *screen-height* 2.0))
-    ;; 			     (+ (slot-value (current-buffer) 'window-x) (* (/ current-speed 1.5) *dt*)))
+    ;; 			     (+ (slot-value (current-buffer) 'window-x) (* (/ max-speed 1.5) *dt*)))
     ;; 			    ((< cam-diff-x (/ *screen-height* 2.0))
-    ;; 			     (- (slot-value (current-buffer) 'window-x) (* (/ current-speed 1.5) *dt*))))
+    ;; 			     (- (slot-value (current-buffer) 'window-x) (* (/ max-speed 1.5) *dt*))))
     ;; 		      (slot-value (current-buffer) 'window-y)))
     
     ;; left mouse firing
@@ -193,7 +199,7 @@
       (let ((overlay-alpha (* 255 (/ (cooldown-timer death-cooldown)
 				     (cooldown-time death-cooldown)))))	
 	(draw-textured-rectangle 0 0 0 *width* *height*
-				 (find-texture "data/dying-overlay.png")
+				 (find-texture "square.png")
 				 :vertex-color `(0.0 0.0 0.0 ,overlay-alpha))))
     
     ;; cooldown ui
@@ -220,7 +226,7 @@
 		:color (enum-rgb bullet-type reload-alpha)))))
 
 (defmethod collide ((player player) (wall wall))
-  (with-slots (direction current-speed last-x last-y x y width height) player
+  (with-slots (direction max-speed last-x last-y x y width height) player
     ;;(format t "~a ~a~%" last-x last-y)
     ;; x movement pass
     (when (colliding-with-bounding-box-p 

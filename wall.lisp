@@ -12,7 +12,7 @@
 
 (defmethod draw ((wall wall))
   (with-slots (x y width height color) wall
-    (draw-textured-rectangle-* x y 0  width height (find-texture "data/square.png")
+    (draw-textured-rectangle-* x y 0  width height (find-texture "square.png")
 			       :vertex-color color)))
      ;;(draw-image "splash.png" :width width :height height)))
 

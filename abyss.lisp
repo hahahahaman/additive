@@ -28,4 +28,6 @@
 
 (defmethod draw ((abyss abyss))
   (with-slots (x y width height) abyss
-    (draw-world-to-screen #'draw-textured-rectangle x y 0 width height (find-texture "data/space.png"))))
+    (draw-world-to-screen #'draw-textured-rectangle x y 0 width height
+			  (find-texture "square.png")
+			  :vertex-color "black")))

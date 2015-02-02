@@ -9,8 +9,8 @@
     :type (unsigned-byte 8))
    (color
     :initform '(0 0 0 255))
-   (current-speed
-    :initform 400.0
+   (max-speed
+    :initform 300.0
     :type short-float)
    (direction
     :initform 0.0
@@ -26,32 +26,59 @@
     :initform (make-cooldown :time 1.0))
    (death-reset-speed
     :initform 2.0
-    :type 'single-float)))
+    :type 'single-float)
+   (knock-back-direction
+    :initform nil)
+   (knock-back
+    :initform (make-cooldown :time 0.1 :timer 0.1)
+    :type 'cooldown)
+   (knock-back-speed
+    :initform 1000)
+   (stun-lock
+    :initform (make-cooldown :time 0.1 :timer 0.1))))
 
+(defgeneric fire (ship))
 (defgeneric die (ship))
 
 (defmethod die ((ship ship))
   ;; TODO: die
+  (with-slots (x y width height) (slot-value (current-buffer) 'stage) 
+    (move-to ship (+ x (/ width 2)) (+ y (/ height 2))))
   (with-slots (x
 	       y
 	       death-cooldown
 	       death-reset-cooldown
 	       color
 	       last-x last-y
-	       current-speed) ship
-    (move-to ship 1320 1240)
+	       max-speed
+	       knock-back
+	       stun-lock) ship
     (setf (cooldown-timer death-reset-cooldown) 0.0
 	  (cooldown-timer death-cooldown) 0.0
 	  color '(0 0 0 255)
 	  last-x x
 	  last-y y
-	  current-speed 400.0)))
+	  max-speed 400.0
+	  knock-back (make-cooldown :time 0.1 :timer 0.1)
+	  stun-lock (make-cooldown :time 0.1 :timer 0.1))))
 
 (defmethod update ((ship ship))
-  (with-slots (death-cooldown
+  (with-slots (color
+	       max-speed
+	       direction
+	       death-cooldown
 	       death-reset-cooldown
-	       death-reset-speed) ship
-    ;; when off stage
+	       death-reset-speed
+	       knock-back-direction
+	       knock-back
+	       knock-back-speed
+	       stun-lock) ship
+
+    (when (< (cooldown-timer knock-back) (cooldown-time knock-back))
+      (incf (cooldown-timer knock-back) *dt*)
+      (move ship knock-back-direction (* knock-back-speed *dt*)))
+    
+    ;; when off stage 
     (when (not (colliding-with-p ship (slot-value (current-buffer) 'stage)))
       (setf (cooldown-timer death-reset-cooldown) 0.0) ;; reset the resetter
       (incf (cooldown-timer death-cooldown) *dt*)) ;; increase death timer
@@ -68,6 +95,7 @@
   (with-slots (death-cooldown
 	       death-reset-cooldown
 	       death-reset-speed) ship
+    
     ;; if the ship gets knocked off and comes back to stage
     ;; takes time for the reset period to start
     (when (> (cooldown-timer death-cooldown) 0.0)
@@ -78,7 +106,6 @@
 	  (progn ;; actually reset	      
 	    (decf (cooldown-timer death-cooldown) (* death-reset-speed *dt*))
 	    (when (<= (cooldown-timer death-cooldown) 0.0)
-	      
 	      (setf (cooldown-timer death-cooldown) 0.0
 		    (cooldown-timer death-reset-cooldown) 0.0)))))))
 
