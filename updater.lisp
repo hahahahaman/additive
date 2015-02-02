@@ -36,7 +36,7 @@
 (defmethod draw ((updater updater))
   (let ((fps-string (concatenate 'string "FPS: "
 				 (write-to-string (slot-value updater 'fps)))))
-    (draw-string fps-string 0 0 :color "green"))
+    (draw-string fps-string 0 0 :color "green" :font "sans"))
   ;;(draw-world-to-screen #'draw-box 1000 1000 10 10 :color "white")
   )
 						  

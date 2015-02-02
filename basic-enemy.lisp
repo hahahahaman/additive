@@ -88,10 +88,10 @@
   (with-slots (x y width height direction color) enemy
     ;;(draw-world-to-screen #'draw-box x y width height)
     (draw-textured-rectangle-* x y 0 width height
-			       (find-texture "up") ;;place holder image
+			       (find-texture "up.png") ;;place holder image
 			       :angle (radians->degrees (+ (/ pi 2) direction))
-			       :tex-w (find-resource-property "up" :width)
-			       :tex-h (find-resource-property "up" :height)
+			       :tex-w (find-resource-property "up.png" :width)
+			       :tex-h (find-resource-property "up.png" :height)
 			       :clip-x 9 :clip-y 9 :clip-w 45 :clip-h 45
 			       :vertex-color color)))
 

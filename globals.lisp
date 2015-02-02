@@ -12,12 +12,9 @@
 
 (defparameter *unit* 16)
 
-(defresource (:name "square.png" :type :image :file "data/square.png" ;;:properties (:filter :linear)
+(defresource (:name "square.png" :type :image :file "data/square.png"
 		    ))
-(defresource (:name "space.png" :type :image :file "data/space.png" ;;:properties (:filter :linear)
-		    ))
-(defresource (:name "dying-overlay.png" :type :image :file "data/dying-overlay.png"
-		    ;;:properties (:filter :linear)
+(defresource (:name "up.png" :type :image :file "data/up.png" ;;:properties (:filter :linear)
 		    ))
 (defresource (:name "beepr.wav" :type :sample :file "data/beepr.wav" :properties (:volume 10)))
 (defresource (:name "beepg.wav" :type :sample :file "data/beepg.wav" :properties (:volume 10)))
@@ -25,5 +22,5 @@
 (defresource (:name "song.ogg" :type :music :file "data/Edward my heart Beats 5 u.ogg"
 	       :properties (:volume 200)))
 
-
+(defresource (:name "sans" :type :ttf :file "data/DejaVuSans.ttf" :properties (:size 11)))
 
